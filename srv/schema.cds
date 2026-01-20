@@ -9,29 +9,63 @@ using com.trail.sample as hm from '../db/schema';
 
 service PharmacyService {
 
-    // Master Data
-    @odata.draft.enabled
-    entity Medicines        as projection on hm.Medicines;
-    @odata.draft.enabled
-    entity Suppliers        as projection on hm.Suppliers;
-    entity PharmacyLicenses as projection on hm.PharmacyLicenses;
+    // ============================
+    // Master Data (User Maintained)
+    // ============================
 
-    // Transactions
+    // Draft-enabled to allow controlled creation and modification
+    // through Fiori Elements Object Pages.
     @odata.draft.enabled
-    entity PurchaseOrders   as projection on hm.PurchaseOrders;
+    entity Medicines         as projection on hm.Medicines;
+
+    @odata.draft.enabled
+    entity Suppliers         as projection on hm.Suppliers;
+
+    // Compliance-related master data.
+    // Maintained less frequently, no draft required.
+    entity PharmacyLicenses  as projection on hm.PharmacyLicenses;
+
+
+    // ============================
+    // Transactional Data
+    // ============================
+
+    // Aggregate root for procurement transactions.
+    // Draft-enabled to support header–item editing via composition.
+    @odata.draft.enabled
+    entity PurchaseOrders    as projection on hm.PurchaseOrders;
+
+    // Aggregate root for sales transactions.
+    // Draft-enabled to support invoice creation and editing.
     @odata.draft.enabled
     entity SalesTransactions as projection on hm.SalesTransactions;
 
-    // Operational Data
-    entity Batches as projection on hm.Batches;
-    @readonly
-    entity Stocks as projection on hm.Stocks;
 
-    // Monitoring (Read-only)
+    // ============================
+    // Operational / Derived Data
+    // ============================
 
-    @readonly
-    entity ExpiryAlerts as projection on hm.ExpiryAlerts;
-    @readonly
-    entity StockAlerts  as projection on hm.StockAlerts;
+    // Batch-level operational data.
+    // Exposed for reference and reporting.
+    entity Batches           as projection on hm.Batches;
 
+    // Stock data is derived from purchase and sales transactions.
+    // Read-only to ensure inventory integrity.
+    @readonly
+    entity Stocks            as projection on hm.Stocks;
+
+
+    // ============================
+    // Monitoring & Alerts
+    // ============================
+
+    // System-generated alerts for near-expiry batches.
+    // Read-only and not user-editable.
+    @readonly
+    entity ExpiryAlerts      as projection on hm.ExpiryAlerts;
+
+    // System-generated alerts for low or critical stock levels.
+    // Read-only for operational monitoring only.
+    @readonly
+    entity StockAlerts       as projection on hm.StockAlerts;
 }
